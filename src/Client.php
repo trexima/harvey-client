@@ -113,7 +113,7 @@ class Client
         $cacheKey = 'isco-'.$code;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('isco/'.$code);
+            $resource = $this->get('api/isco/'.$code);
 
             return (string) $resource->getBody();
         });
@@ -137,7 +137,7 @@ class Client
         $cacheKey = 'search-isco-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('isco', [
+            $resource = $this->get('api/isco', [
                 $args
             ]);
 
@@ -157,7 +157,7 @@ class Client
         $cacheKey = 'school-type-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('school-type/'.$id);
+            $resource = $this->get('api/school-type/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -177,7 +177,7 @@ class Client
         $cacheKey = 'school-type-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('school-type', [
+            $resource = $this->get('api/school-type', [
                 $args
             ]);
 
@@ -198,7 +198,7 @@ class Client
         $cacheKey = 'school-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('school/'.$id);
+            $resource = $this->get('api/school/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -221,7 +221,7 @@ class Client
         $cacheKey = 'school-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('school', [
+            $resource = $this->get('api/school', [
                 $args
             ]);
 
@@ -242,7 +242,7 @@ class Client
         $cacheKey = 'kov-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('kov/'.$id);
+            $resource = $this->get('api/kov/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -264,7 +264,7 @@ class Client
         $cacheKey = 'kov-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('kov', [
+            $resource = $this->get('api/kov', [
                 $args
             ]);
 
@@ -285,7 +285,7 @@ class Client
         $cacheKey = 'kov-school-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('kov-school/'.$id);
+            $resource = $this->get('api/kov-school/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -307,7 +307,7 @@ class Client
         $cacheKey = 'kov-school-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('kov-school', [
+            $resource = $this->get('api/kov-school', [
                 $args
             ]);
 
@@ -328,7 +328,7 @@ class Client
         $cacheKey = 'isced-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('isced/'.$id);
+            $resource = $this->get('api/isced/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -350,7 +350,7 @@ class Client
         $cacheKey = 'isced-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('isced', [
+            $resource = $this->get('api/isced', [
                 $args
             ]);
 
@@ -371,7 +371,7 @@ class Client
         $cacheKey = 'sknace-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('sknace/'.$id);
+            $resource = $this->get('api/sknace/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -393,7 +393,7 @@ class Client
         $cacheKey = 'sknace-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('sknace', [
+            $resource = $this->get('api/sknace', [
                 $args
             ]);
 
