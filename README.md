@@ -7,7 +7,7 @@ Add repository to composer.json:
 "repositories": [
     {
         "type": "git",
-        "url": "https://github.com/trexima/soap-client.git"
+        "url": "https://github.com/trexima/harvey-client.git"
     }
 ],
 ```
