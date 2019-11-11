@@ -52,13 +52,13 @@ class Client
         string $apiUrl,
         string $apiUsername,
         string $apiPassword,
-        CacheInterface $cacheHarveyRedis,
+        CacheInterface $cache,
         int $cacheTtl = self::CACHE_TTL,
         string $language = self::DEFAULT_LANGUAGE
     ) {
         $this->client = new \GuzzleHttp\Client(['base_uri' => rtrim($apiUrl, '/').'/']);
 
-        $this->cache = $cacheHarveyRedis;
+        $this->cache = $cache;
         $this->apiUsername = $apiUsername;
         $this->apiPassword = $apiPassword;
         $this->cacheTtl = $cacheTtl;
