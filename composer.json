@@ -1,0 +1,21 @@
+{
+    "name": "trexima/harvey-client",
+    "description": "Client for Harvey API v2",
+    "version": "1.0",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "buzak",
+            "email": "buzak@trexima.sk"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.0",
+        "symfony/cache-contracts": "^2.0",
+        "guzzlehttp/guzzle": "^6.4"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master"
+    }
+}
