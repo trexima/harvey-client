@@ -19,6 +19,6 @@
         "roave/security-advisories": "dev-master"
     },
     "autoload": {
-        "psr-4": {"Trexima\\HarveyClient": "src/"}
+        "psr-4": {"Trexima\\HarveyClient\\": "src/"}
     }
 }
