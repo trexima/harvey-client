@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Trexima\HarveyClient;
 
+use GuzzleHttp\Exception\InvalidArgumentException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -90,6 +91,17 @@ class Client
     }
 
     /**
+     * @param string $json
+     * @param bool $assoc
+     * @return mixed
+     * @throws InvalidArgumentException if the JSON cannot be decoded.
+     */
+    public function jsonDecode(string $json, $assoc = true)
+    {
+        return \GuzzleHttp\json_decode($json, $assoc);
+    }
+
+    /**
      * Get ISCO by code.
      *
      * @param string $code
@@ -106,7 +118,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return  json_decode($result);
+        return  $this->jsonDecode($result);
     }
 
     /**
@@ -132,7 +144,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -150,7 +162,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return  json_decode($result);
+        return  $this->jsonDecode($result);
     }
 
     /**
@@ -172,7 +184,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -191,7 +203,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -216,7 +228,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -235,7 +247,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -259,7 +271,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -278,7 +290,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -302,7 +314,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -321,7 +333,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -345,7 +357,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -364,7 +376,7 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -388,6 +400,6 @@ class Client
             return (string) $resource->getBody();
         });
 
-        return json_decode($result);
+        return $this->jsonDecode($result);
     }
 }
