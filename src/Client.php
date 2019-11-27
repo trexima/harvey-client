@@ -23,6 +23,11 @@ class Client
     private $client;
 
     /**
+     * @var MethodParameterExtractor
+     */
+    private $methodParameterExtractor;
+
+    /**
      * @var CacheInterface
      */
     private $cache;
@@ -53,12 +58,14 @@ class Client
         string $apiUrl,
         string $apiUsername,
         string $apiPassword,
+        MethodParameterExtractor $methodParameterExtractor,
         CacheInterface $cache,
         int $cacheTtl = self::CACHE_TTL,
         string $language = self::DEFAULT_LANGUAGE
     ) {
         $this->client = new \GuzzleHttp\Client(['base_uri' => rtrim($apiUrl, '/').'/']);
 
+        $this->methodParameterExtractor = $methodParameterExtractor;
         $this->cache = $cache;
         $this->apiUsername = $apiUsername;
         $this->apiPassword = $apiPassword;
@@ -67,7 +74,7 @@ class Client
     }
 
     /**
-     * Perform get request on API.
+     * Perform get request on API
      *
      * @param $resurce
      * @param null $query
@@ -102,7 +109,7 @@ class Client
     }
 
     /**
-     * Get ISCO by code.
+     * Get ISCO by code
      *
      * @param string $code
      * @return mixed
@@ -122,24 +129,25 @@ class Client
     }
 
     /**
-     * Search ISCO with extended search algorithm.
+     * Search ISCO with extended search algorithm
      *
-     * @param null $name
-     * @param null $code
+     * @param string|null $title
+     * @param array $level
+     * @param string|null $code
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function searchIsco(?string $name = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIsco(?string $title = null, array $level = [], ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'search-isco-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isco', [
-                $args
-            ]);
+            $resource = $this->get('api/isco', $args);
 
             return (string) $resource->getBody();
         });
@@ -170,16 +178,16 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function searchSchoolType($page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'school-type-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-type', [
-                $args
-            ]);
+            $resource = $this->get('api/school-type', $args);
 
             return (string) $resource->getBody();
         });
@@ -194,7 +202,6 @@ class Client
      */
     public function getSchool(int $id)
     {
-        $args = func_get_args();
         $cacheKey = 'school-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
@@ -207,23 +214,23 @@ class Client
     }
 
     /**
-     * @param string|null $name
+     * @param string|null $title
      * @param string|null $eduid
      * @param string|null $kodfak
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function searchSchool(?string $name = null, ?string $eduid = null, ?string $kodfak = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchool(?string $title = null, ?string $eduid = null, ?string $kodfak = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'school-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school', [
-                $args
-            ]);
+            $resource = $this->get('api/school', $args);
 
             return (string) $resource->getBody();
         });
@@ -238,7 +245,6 @@ class Client
      */
     public function getKov(int $id)
     {
-        $args = func_get_args();
         $cacheKey = 'kov-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
@@ -251,22 +257,22 @@ class Client
     }
 
     /**
-     * @param string|null $name
+     * @param string|null $title
      * @param string|null $code
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function searchKov(?string $name = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchKov(?string $title = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'kov-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov', [
-                $args
-            ]);
+            $resource = $this->get('api/kov', $args);
 
             return (string) $resource->getBody();
         });
@@ -281,7 +287,6 @@ class Client
      */
     public function getKovSchool(int $id)
     {
-        $args = func_get_args();
         $cacheKey = 'kov-school-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
@@ -294,22 +299,20 @@ class Client
     }
 
     /**
-     * @param string|null $name
-     * @param string|null $code
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function searchKovSchool($page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'kov-school-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov-school', [
-                $args
-            ]);
+            $resource = $this->get('api/kov-school', $args);
 
             return (string) $resource->getBody();
         });
@@ -318,17 +321,16 @@ class Client
     }
 
     /**
-     * @param int $id
+     * @param string $code
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getIsced(int $id)
+    public function getIsced(string $code)
     {
-        $args = func_get_args();
-        $cacheKey = 'isced-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'isced-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isced/'.$id);
+            $resource = $this->get('api/isced/'.$code);
 
             return (string) $resource->getBody();
         });
@@ -337,22 +339,23 @@ class Client
     }
 
     /**
-     * @param string|null $name
+     * @param string|null $title
+     * @param array $level
      * @param string|null $code
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function searchIsced(?string $name = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIsced(?string $title = null, array $level = [], ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'isced-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isced', [
-                $args
-            ]);
+            $resource = $this->get('api/isced', $args);
 
             return (string) $resource->getBody();
         });
@@ -361,17 +364,16 @@ class Client
     }
 
     /**
-     * @param int $id
+     * @param int $code
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getSknace(int $id)
+    public function getSknace(int $code)
     {
-        $args = func_get_args();
-        $cacheKey = 'sknace-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'sknace-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/sknace/'.$id);
+            $resource = $this->get('api/sknace/'.$code);
 
             return (string) $resource->getBody();
         });
@@ -380,22 +382,71 @@ class Client
     }
 
     /**
-     * @param string|null $name
+     * @param string|null $title
      * @param string|null $code
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public function searchSknace(?string $name = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSknace(?string $title = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
     {
-        $args = func_get_args();
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
         $cacheKey = 'sknace-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/sknace', [
-                $args
-            ]);
+            $resource = $this->get('api/sknace', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+
+
+    /**
+     * Get CPA 2015 by code
+     *
+     * @param string $code
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getCpa(string $code)
+    {
+        $cacheKey = 'cpa-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/cpa/'.$code);
+
+            return (string) $resource->getBody();
+        });
+
+        return  $this->jsonDecode($result);
+    }
+
+    /**
+     * Search CPA 2015
+     *
+     * @param string|null $title
+     * @param string|null $code
+     * @param array $level
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchCpa(?string $title = null, array $level = [], ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'search-cpa-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/cpa', $args);
 
             return (string) $resource->getBody();
         });
