@@ -140,7 +140,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchIsco(?string $title = null, array $level = [], ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIsco(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -180,7 +180,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSchoolType($page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchoolType($page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -223,7 +223,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSchool(?string $title = null, ?string $eduid = null, ?string $kodfak = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchool(?string $title = null, ?string $eduid = null, ?string $kodfak = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -265,7 +265,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchKov(?string $title = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchKov(?string $title = null, ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -305,7 +305,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchKovSchool($page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchKovSchool($page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -348,7 +348,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchIsced(?string $title = null, array $level = [], ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIsced(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -364,11 +364,11 @@ class Client
     }
 
     /**
-     * @param int $code
+     * @param string $code
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getSknace(int $code)
+    public function getSknace(string $code)
     {
         $cacheKey = 'sknace-'.$code;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
@@ -390,7 +390,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSknace(?string $title = null, ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSknace(?string $title = null, ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -439,7 +439,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchCpa(?string $title = null, array $level = [], ?string $code = null, $page = 0, $perPage = self::RESULTS_PER_PAGE)
+    public function searchCpa(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
