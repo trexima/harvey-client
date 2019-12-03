@@ -447,8 +447,6 @@ class Client
         return $this->jsonDecode($result);
     }
 
-
-
     /**
      * Get CPA 2015 by code
      *
@@ -489,6 +487,98 @@ class Client
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/cpa', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * Get ESCO by id
+     *
+     * @param int $id
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getEsco(int $id)
+    {
+        $cacheKey = 'esco-'.$id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/esco/'.$id);
+
+            return (string) $resource->getBody();
+        });
+
+        return  $this->jsonDecode($result);
+    }
+
+    /**
+     * Search ESCO
+     *
+     * @param string|null $title
+     * @param string|null $url
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchEsco(?string $title = null, ?string $url = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'search-esco-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/esco', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * Get ISCO -> ESCO by id
+     *
+     * @param int $id
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getIscoEsco(int $id)
+    {
+        $cacheKey = 'isco-esco-'.$id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco-esco/'.$id);
+
+            return (string) $resource->getBody();
+        });
+
+        return  $this->jsonDecode($result);
+    }
+
+    /**
+     * Search ISCO -> ESCO by ISCO code or ESCO id
+     *
+     * @param array $isco
+     * @param array $esco
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchIscoEsco(array $isco = [], array $esco = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'search-isco-esco-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco-esco', $args);
 
             return (string) $resource->getBody();
         });
