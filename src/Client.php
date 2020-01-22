@@ -425,6 +425,7 @@ class Client
 
     /**
      * @param string|null $title
+     * @param array $level
      * @param string|null $code
      * @param int $page
      * @param int $perPage
@@ -432,7 +433,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSknace(?string $title = null, ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSknace(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
