@@ -323,16 +323,16 @@ class Client
     }
 
     /**
-     * @param int $id
+     * @param string $code
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getKov(int $id)
+    public function getKov(string $code)
     {
-        $cacheKey = 'kov-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'kov-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov/'.$id);
+            $resource = $this->get('api/kov/'.$code);
 
             return (string) $resource->getBody();
         });
