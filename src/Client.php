@@ -156,16 +156,61 @@ class Client
     }
 
     /**
-     * @param int $id
+     * @param string $code
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getSchoolType(int $id)
+    public function getSchool(string $code)
     {
-        $cacheKey = 'school-type-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'school-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-type/'.$id);
+            $resource = $this->get('api/school/'.$code);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param string|null $title
+     * @param string|null $street
+     * @param string|null $eduid
+     * @param string|null $kodfak
+     * @param array $type
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchSchool(?string $title = null, ?string $street = null, ?string $eduid = null, ?string $kodfak = null, array $type = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'school-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param string $code
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getSchoolType(string $code)
+    {
+        $cacheKey = 'school-type-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-type/'.$code);
 
             return (string) $resource->getBody();
         });
@@ -200,12 +245,12 @@ class Client
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getSchool(int $id)
+    public function getSchoolKov(int $id)
     {
-        $cacheKey = 'school-'.$id;
+        $cacheKey = 'school-kov-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school/'.$id);
+            $resource = $this->get('api/school-kov/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -214,23 +259,62 @@ class Client
     }
 
     /**
-     * @param string|null $title
-     * @param string|null $eduid
-     * @param string|null $kodfak
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSchool(?string $title = null, ?string $eduid = null, ?string $kodfak = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchoolKov($page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'school-'.crc32(json_encode([$args]));
+        $cacheKey = 'school-kov-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school', $args);
+            $resource = $this->get('api/school-kov', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param int $id
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getSchoolKovYear(int $id)
+    {
+        $cacheKey = 'school-kov-year-'.$id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-kov-year/'.$id);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param string $school Code of school
+     * @param array $year
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchSchoolKovYear(?string $school = null, array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'school-kov-year-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-kov-year', $args);
 
             return (string) $resource->getBody();
         });
@@ -315,46 +399,6 @@ class Client
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level', $args);
-
-            return (string) $resource->getBody();
-        });
-
-        return $this->jsonDecode($result);
-    }
-
-    /**
-     * @param int $id
-     * @return mixed
-     * @throws \Psr\Cache\InvalidArgumentException
-     */
-    public function getKovSchool(int $id)
-    {
-        $cacheKey = 'kov-school-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
-            $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov-school/'.$id);
-
-            return (string) $resource->getBody();
-        });
-
-        return $this->jsonDecode($result);
-    }
-
-    /**
-     * @param int $page
-     * @param int $perPage
-     * @return mixed
-     * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
-     */
-    public function searchKovSchool($page = 1, $perPage = self::RESULTS_PER_PAGE)
-    {
-        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
-        $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'kov-school-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
-            $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov-school', $args);
 
             return (string) $resource->getBody();
         });
