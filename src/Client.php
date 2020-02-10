@@ -205,6 +205,50 @@ class Client
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
+    public function getSchoolLegacy(string $code)
+    {
+        $cacheKey = 'school-legacy-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-legacy/'.$code);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param string|null $title
+     * @param string|null $street
+     * @param array $codeLegacy
+     * @param array $year
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchSchoolLegacy(?string $title = null, ?string $street = null, array $codeLegacy = [], array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'school-legacy-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-legacy', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param string $code
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function getSchoolType(string $code)
     {
         $cacheKey = 'school-type-'.$code;
@@ -300,6 +344,7 @@ class Client
 
     /**
      * @param string $school Code of school
+     * @param string $kov Code of KOV
      * @param array $year
      * @param int $page
      * @param int $perPage
@@ -307,7 +352,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSchoolKovYear(?string $school = null, array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchoolKovYear(?string $school = null, ?string $kov = null, array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
