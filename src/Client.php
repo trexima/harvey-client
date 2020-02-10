@@ -175,17 +175,19 @@ class Client
 
     /**
      * @param string|null $title
+     * @param string|null $nuts Begin of NUTS code
      * @param string|null $street
      * @param string|null $eduid
      * @param string|null $kodfak
      * @param array $type
+     * @param array $root Root school code
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSchool(?string $title = null, ?string $street = null, ?string $eduid = null, ?string $kodfak = null, array $type = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchool(?string $title = null, ?string $nuts = null, ?string $street = null, ?string $eduid = null, ?string $kodfak = null, array $type = [], array $root = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
