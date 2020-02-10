@@ -201,16 +201,16 @@ class Client
     }
 
     /**
-     * @param string $code
+     * @param int $id
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function getSchoolLegacy(string $code)
+    public function getSchoolLegacy(int $id)
     {
-        $cacheKey = 'school-legacy-'.$code;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'school-legacy-'.$id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-legacy/'.$code);
+            $resource = $this->get('api/school-legacy/'.$id);
 
             return (string) $resource->getBody();
         });
@@ -221,6 +221,7 @@ class Client
     /**
      * @param string|null $title
      * @param string|null $street
+     * @param array $school Array of school codes
      * @param array $codeLegacy
      * @param array $year
      * @param int $page
@@ -229,7 +230,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchSchoolLegacy(?string $title = null, ?string $street = null, array $codeLegacy = [], array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchoolLegacy(?string $title = null, ?string $street = null, array $school = [], array $codeLegacy = [], array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
