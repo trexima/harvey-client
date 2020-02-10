@@ -676,4 +676,46 @@ class Client
 
         return $this->jsonDecode($result);
     }
+
+    /**
+     * @param string $code
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getNuts(string $code)
+    {
+        $cacheKey = 'nuts-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/nuts/'.$code);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param string|null $title
+     * @param array $level
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchNuts(?string $title = null, array $level = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'nuts-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/nuts', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
 }
