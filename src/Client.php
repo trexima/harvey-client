@@ -455,6 +455,47 @@ class Client
     }
 
     /**
+     * @param int $id
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getKovLevelIsced(int $id)
+    {
+        $cacheKey = 'kov-level-isced-'.$id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/kov-level-isced/'.$id);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * @param array $kovLevel
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchKovLevelIsced(array $kovLevel = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'kov-level-isced-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/kov-level-isced', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
      * @param string $code
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
