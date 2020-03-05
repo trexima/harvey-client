@@ -155,6 +155,55 @@ class Client
         return $this->jsonDecode($result);
     }
 
+
+
+    /**
+     * Get ISCO group by id
+     *
+     * @param string $code
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getIscoGroup(string $code)
+    {
+        $cacheKey = 'isco-group-'.$code;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco-group/'.$code);
+
+            return (string) $resource->getBody();
+        });
+
+        return  $this->jsonDecode($result);
+    }
+
+    /**
+     * Search ISCO group
+     *
+     * @param string|null $title
+     * @param array $level
+     * @param string|null $code
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function searchIscoGroup(?string $title = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'search-isco-group-'.crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco-group', $args);
+
+            return (string) $resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
     /**
      * @param string $code
      * @return mixed
@@ -191,7 +240,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'school-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-school-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school', $args);
@@ -236,7 +285,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'school-legacy-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-school-legacy-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-legacy', $args);
@@ -276,7 +325,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'school-type-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-school-type-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-type', $args);
@@ -316,7 +365,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'school-kov-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-school-kov-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov', $args);
@@ -359,7 +408,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'school-kov-year-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-school-kov-year-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov-year', $args);
@@ -401,7 +450,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'kov-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-kov-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov', $args);
@@ -443,7 +492,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'kov-level-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-kov-level-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level', $args);
@@ -484,7 +533,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'kov-level-isced-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-kov-level-isced-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level-isced', $args);
@@ -527,7 +576,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'isced-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-isced-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isced', $args);
@@ -570,7 +619,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'sknace-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-sknace-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/sknace', $args);
@@ -751,7 +800,7 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'nuts-'.crc32(json_encode([$args]));
+        $cacheKey = 'search-nuts-'.crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/nuts', $args);
