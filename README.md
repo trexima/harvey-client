@@ -26,7 +26,7 @@ require __DIR__.'/../vendor/autoload.php';
 $cache = new \Symfony\Component\Cache\Adapter\ArrayAdapter();
 $methodPatameterExtractor = new \Trexima\HarveyClient\MethodParameterExtractor($cache);
 
-$harveyClient = new Trexima\HarveyClient\Client('http://127.0.0.1/v2/', 'admin', 'Yoc$oo3Dee3noo4e', $methodPatameterExtractor, $cache);
+$harveyClient = new Trexima\HarveyClient\Client('http://127.0.0.1/v2/', 'admin', 'my_password', $methodPatameterExtractor, $cache);
 
 var_dump($harveyClient->searchIsced());
 var_dump($harveyClient->getIsced('35'));
