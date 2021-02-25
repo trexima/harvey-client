@@ -117,7 +117,7 @@ class Client
      */
     public function getIsco(string $code)
     {
-        $cacheKey = 'isco-'.$code;
+        $cacheKey = 'isco-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco/'.$code);
@@ -166,7 +166,7 @@ class Client
      */
     public function getIscoGroup(string $code)
     {
-        $cacheKey = 'isco-group-'.$code;
+        $cacheKey = 'isco-group-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco-group/'.$code);
@@ -211,7 +211,7 @@ class Client
      */
     public function getSchool(string $code)
     {
-        $cacheKey = 'school-'.$code;
+        $cacheKey = 'school-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school/'.$code);
@@ -258,7 +258,7 @@ class Client
      */
     public function getSchoolLegacy(int $id)
     {
-        $cacheKey = 'school-legacy-'.$id;
+        $cacheKey = 'school-legacy-'.md5($id);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-legacy/'.$id);
@@ -303,7 +303,7 @@ class Client
      */
     public function getSchoolType(string $code)
     {
-        $cacheKey = 'school-type-'.$code;
+        $cacheKey = 'school-type-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-type/'.$code);
@@ -343,7 +343,7 @@ class Client
      */
     public function getSchoolKov(int $id)
     {
-        $cacheKey = 'school-kov-'.$id;
+        $cacheKey = 'school-kov-'.md5($id);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov/'.$id);
@@ -383,7 +383,7 @@ class Client
      */
     public function getSchoolKovYear(int $id)
     {
-        $cacheKey = 'school-kov-year-'.$id;
+        $cacheKey = 'school-kov-year-'.md5($id);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov-year/'.$id);
@@ -426,7 +426,7 @@ class Client
      */
     public function getKov(string $code)
     {
-        $cacheKey = 'kov-'.$code;
+        $cacheKey = 'kov-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov/'.$code);
@@ -468,7 +468,7 @@ class Client
      */
     public function getKovLevel(string $code)
     {
-        $cacheKey = 'kov-level-'.$code;
+        $cacheKey = 'kov-level-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level/'.$code);
@@ -510,7 +510,7 @@ class Client
      */
     public function getKovLevelIsced(int $id)
     {
-        $cacheKey = 'kov-level-isced-'.$id;
+        $cacheKey = 'kov-level-isced-'.md5($id);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level-isced/'.$id);
@@ -551,7 +551,7 @@ class Client
      */
     public function getIsced(string $code)
     {
-        $cacheKey = 'isced-'.$code;
+        $cacheKey = 'isced-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isced/'.$code);
@@ -594,7 +594,7 @@ class Client
      */
     public function getSknace(string $code)
     {
-        $cacheKey = 'sknace-'.$code;
+        $cacheKey = 'sknace-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/sknace/'.$code);
@@ -639,7 +639,7 @@ class Client
      */
     public function getCpa(string $code)
     {
-        $cacheKey = 'cpa-'.$code;
+        $cacheKey = 'cpa-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/cpa/'.$code);
@@ -686,7 +686,7 @@ class Client
      */
     public function getEsco(int $id)
     {
-        $cacheKey = 'esco-'.$id;
+        $cacheKey = 'esco-'.md5($id);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/esco/'.$id);
@@ -732,7 +732,7 @@ class Client
      */
     public function getIscoEsco(int $id)
     {
-        $cacheKey = 'isco-esco-'.$id;
+        $cacheKey = 'isco-esco-'.md5($id);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco-esco/'.$id);
@@ -776,7 +776,7 @@ class Client
      */
     public function getNuts(string $code)
     {
-        $cacheKey = 'nuts-'.$code;
+        $cacheKey = 'nuts-'.md5($code);
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/nuts/'.$code);
