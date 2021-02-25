@@ -258,7 +258,7 @@ class Client
      */
     public function getSchoolLegacy(int $id)
     {
-        $cacheKey = 'school-legacy-'.md5($id);
+        $cacheKey = 'school-legacy-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-legacy/'.$id);
@@ -343,7 +343,7 @@ class Client
      */
     public function getSchoolKov(int $id)
     {
-        $cacheKey = 'school-kov-'.md5($id);
+        $cacheKey = 'school-kov-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov/'.$id);
@@ -383,7 +383,7 @@ class Client
      */
     public function getSchoolKovYear(int $id)
     {
-        $cacheKey = 'school-kov-year-'.md5($id);
+        $cacheKey = 'school-kov-year-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov-year/'.$id);
@@ -510,7 +510,7 @@ class Client
      */
     public function getKovLevelIsced(int $id)
     {
-        $cacheKey = 'kov-level-isced-'.md5($id);
+        $cacheKey = 'kov-level-isced-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level-isced/'.$id);
@@ -686,7 +686,7 @@ class Client
      */
     public function getEsco(int $id)
     {
-        $cacheKey = 'esco-'.md5($id);
+        $cacheKey = 'esco-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/esco/'.$id);
@@ -732,7 +732,7 @@ class Client
      */
     public function getIscoEsco(int $id)
     {
-        $cacheKey = 'isco-esco-'.md5($id);
+        $cacheKey = 'isco-esco-'.$id;
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco-esco/'.$id);
