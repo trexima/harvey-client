@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace Trexima\HarveyClient;
 
@@ -62,8 +62,9 @@ class Client
         CacheInterface $cache,
         int $cacheTtl = self::CACHE_TTL,
         string $language = self::DEFAULT_LANGUAGE
-    ) {
-        $this->client = new \GuzzleHttp\Client(['base_uri' => rtrim($apiUrl, '/').'/']);
+    )
+    {
+        $this->client = new \GuzzleHttp\Client(['base_uri' => rtrim($apiUrl, '/') . '/']);
 
         $this->methodParameterExtractor = $methodParameterExtractor;
         $this->cache = $cache;
@@ -117,45 +118,86 @@ class Client
      */
     public function getIsco(string $code)
     {
-        $cacheKey = 'isco-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'isco-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isco/'.$code);
+            $resource = $this->get('api/isco/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
-        return  $this->jsonDecode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
      * Search ISCO with extended search algorithm
      *
      * @param string|null $title
+     * @param int|null $workArea
+     * @param string|null $alternativeNames_title
      * @param array $level
      * @param string|null $code
+     * @param int|null $revisions
      * @param int $page
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws \ReflectionException
      */
-    public function searchIsco(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIsco(?string $title = null, ?int $workArea = null, ?string $alternativeNames_title = null, array $level = [], ?string $code = null, ?int $revisions = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
-        $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-isco-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $args = array_filter(array_combine($parameterNames, func_get_args()));
+        if (array_key_exists('alternativeNames_title', $args)) {
+            // fix due dot requirement in argument
+            $args['alternativeNames.title'] = $args['alternativeNames_title'];
+            unset($args['alternativeNames_title']);
+        }
+        if (null === $revisions) {
+            $args['revisions'] = $this->getLatestRevision();
+        }
+        $cacheKey = 'search-isco-' . crc32(json_encode($args));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco', $args);
-
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
-
         return $this->jsonDecode($result);
     }
 
+    /**
+     * @param string|null $title
+     * @param string $order
+     * @return array
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws \ReflectionException
+     */
+    public function fulltextIsco(?string $title, string $order = 'title'): array
+    {
+        if (preg_match('/^[0-9]{1,7}$/im', $title)) {
+            return $this->searchIsco(null, null, null, [], $title, null, 1, 10000);
+        }
+        // if it ain't a code, search
+        $names = $this->searchIsco($title, null, null, [], null, null, 1, 10000);
+        $aNames = $this->searchIsco(null, null, $title, [], null, null, 1, 10000);
+        $iscos = array_merge($names, $aNames);
+        $iscos = array_intersect_key($iscos, array_unique(array_map('serialize', $iscos)));
+        uasort($iscos, function ($a, $b) use ($order) {
+            if ($a[$order] === $b[$order]) {
+                return 0;
+            }
+            return ($a[$order] < $b[$order]) ? -1 : 1;
+        });
+        return $iscos;
+    }
 
+    private function getLatestRevision(): int
+    {
+        $resource = $this->get('/api/revision', ['order[revisionId]' => 'desc', 'perPage' => 1]);
+        $response = json_decode((string)$resource->getBody(), true);
+        $revision = array_pop($response);
+        return (int)$revision['id'];
+    }
 
     /**
      * Get ISCO group by id
@@ -166,15 +208,15 @@ class Client
      */
     public function getIscoGroup(string $code)
     {
-        $cacheKey = 'isco-group-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'isco-group-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isco-group/'.$code);
+            $resource = $this->get('api/isco-group/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
-        return  $this->jsonDecode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -193,12 +235,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-isco-group-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-isco-group-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco-group', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -211,12 +253,12 @@ class Client
      */
     public function getSchool(string $code)
     {
-        $cacheKey = 'school-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'school-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school/'.$code);
+            $resource = $this->get('api/school/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -240,12 +282,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-school-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-school-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -258,12 +300,12 @@ class Client
      */
     public function getSchoolLegacy(int $id)
     {
-        $cacheKey = 'school-legacy-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'school-legacy-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-legacy/'.$id);
+            $resource = $this->get('api/school-legacy/' . $id);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -285,12 +327,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-school-legacy-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-school-legacy-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-legacy', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -303,15 +345,15 @@ class Client
      */
     public function getSchoolType(string $code)
     {
-        $cacheKey = 'school-type-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'school-type-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-type/'.$code);
+            $resource = $this->get('api/school-type/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
-        return  $this->jsonDecode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -325,12 +367,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-school-type-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-school-type-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-type', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -343,12 +385,12 @@ class Client
      */
     public function getSchoolKov(int $id)
     {
-        $cacheKey = 'school-kov-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'school-kov-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-kov/'.$id);
+            $resource = $this->get('api/school-kov/' . $id);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -365,12 +407,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-school-kov-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-school-kov-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -383,12 +425,12 @@ class Client
      */
     public function getSchoolKovYear(int $id)
     {
-        $cacheKey = 'school-kov-year-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'school-kov-year-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/school-kov-year/'.$id);
+            $resource = $this->get('api/school-kov-year/' . $id);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -408,12 +450,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-school-kov-year-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-school-kov-year-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/school-kov-year', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -426,12 +468,12 @@ class Client
      */
     public function getKov(string $code)
     {
-        $cacheKey = 'kov-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'kov-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov/'.$code);
+            $resource = $this->get('api/kov/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -450,12 +492,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-kov-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-kov-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -468,12 +510,12 @@ class Client
      */
     public function getKovLevel(string $code)
     {
-        $cacheKey = 'kov-level-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'kov-level-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov-level/'.$code);
+            $resource = $this->get('api/kov-level/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -492,12 +534,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-kov-level-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-kov-level-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -510,12 +552,12 @@ class Client
      */
     public function getKovLevelIsced(int $id)
     {
-        $cacheKey = 'kov-level-isced-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'kov-level-isced-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/kov-level-isced/'.$id);
+            $resource = $this->get('api/kov-level-isced/' . $id);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -533,12 +575,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-kov-level-isced-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-kov-level-isced-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/kov-level-isced', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -551,12 +593,12 @@ class Client
      */
     public function getIsced(string $code)
     {
-        $cacheKey = 'isced-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'isced-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isced/'.$code);
+            $resource = $this->get('api/isced/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -576,12 +618,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-isced-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-isced-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isced', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -594,12 +636,12 @@ class Client
      */
     public function getSknace(string $code)
     {
-        $cacheKey = 'sknace-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'sknace-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/sknace/'.$code);
+            $resource = $this->get('api/sknace/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -619,12 +661,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-sknace-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-sknace-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/sknace', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -639,15 +681,15 @@ class Client
      */
     public function getCpa(string $code)
     {
-        $cacheKey = 'cpa-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'cpa-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/cpa/'.$code);
+            $resource = $this->get('api/cpa/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
-        return  $this->jsonDecode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -666,12 +708,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-cpa-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-cpa-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/cpa', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -686,15 +728,15 @@ class Client
      */
     public function getEsco(int $id)
     {
-        $cacheKey = 'esco-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'esco-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/esco/'.$id);
+            $resource = $this->get('api/esco/' . $id);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
-        return  $this->jsonDecode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -712,12 +754,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-esco-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-esco-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/esco', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -732,15 +774,15 @@ class Client
      */
     public function getIscoEsco(int $id)
     {
-        $cacheKey = 'isco-esco-'.$id;
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($id) {
+        $cacheKey = 'isco-esco-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/isco-esco/'.$id);
+            $resource = $this->get('api/isco-esco/' . $id);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
-        return  $this->jsonDecode($result);
+        return $this->jsonDecode($result);
     }
 
     /**
@@ -758,12 +800,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-isco-esco-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-isco-esco-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco-esco', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -776,12 +818,12 @@ class Client
      */
     public function getNuts(string $code)
     {
-        $cacheKey = 'nuts-'.md5($code);
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($code) {
+        $cacheKey = 'nuts-' . md5($code);
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($code) {
             $item->expiresAfter($this->cacheTtl);
-            $resource = $this->get('api/nuts/'.$code);
+            $resource = $this->get('api/nuts/' . $code);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -800,12 +842,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-nuts-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-nuts-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/nuts', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -826,12 +868,12 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-organization-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-organization-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/organization', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
         return $this->jsonDecode($result);
@@ -851,14 +893,38 @@ class Client
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
-        $cacheKey = 'search-position-'.crc32(json_encode([$args]));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use($args) {
+        $cacheKey = 'search-position-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/position', $args);
 
-            return (string) $resource->getBody();
+            return (string)$resource->getBody();
         });
 
+        return $this->jsonDecode($result);
+    }
+
+    public function getIscoWorkAreas($page = 1, $perPage = self::RESULTS_PER_PAGE, ?string $title = '')
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'isco-work-area-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco-work-area', $args);
+            return (string)$resource->getBody();
+        });
+        return $this->jsonDecode($result);
+    }
+
+    public function getIscoWorkArea(int $id)
+    {
+        $cacheKey = 'iscoworkarea-' . $id;
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($id) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco-work-area/' . $id);
+            return (string)$resource->getBody();
+        });
         return $this->jsonDecode($result);
     }
 }
