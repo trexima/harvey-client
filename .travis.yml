@@ -1,5 +1,5 @@
 before_script:
-  - copy .env.dist .env
+  - cp .env.dist .env
   - composer install --dev
 language: php
 php:
