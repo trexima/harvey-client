@@ -28,14 +28,13 @@ class MethodParameterExtractor
      */
     public function extract(string $className, string $methodName)
     {
-        return $this->cache->get(sprintf('method-parameter-extractor-%s', crc32($className.$methodName)), function (ItemInterface $item) use($className, $methodName) {
+        return $this->cache->get(sprintf('method-parameter-extractor-%s', crc32($className . $methodName)), function (ItemInterface $item) use ($className, $methodName) {
             $reflection = new \ReflectionMethod($className, $methodName);
             $reflectionParameters = $reflection->getParameters();
             $parameters = [];
             foreach ($reflectionParameters as $reflectionParameter) {
                 $parameters[$reflectionParameter->getPosition()] = $reflectionParameter->getName();
             }
-
             return $parameters;
         });
     }
