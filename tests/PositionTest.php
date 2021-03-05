@@ -22,6 +22,7 @@ final class PositionTest extends TestCase
     public function testPosition(): void
     {
         $position = $this->harveyClient->searchPosition(5349);
+        $position = array_pop($position);
         $this->assertEquals(5349, $position['idIstp']);
         $this->assertEquals('Dispečer, výpravca v železničnej doprave', $position['title']);
     }
