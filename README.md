@@ -1,6 +1,8 @@
 # Harvey client
 Service for making requests on Harvey API v2.
 
+develop: [![Build Status](https://api.travis-ci.com/trexima/harvey-client.svg?branch=develop)](https://travis-ci.com/trexima/harvey-client)
+main: [![Build Status](https://api.travis-ci.com/trexima/harvey-client.svg?branch=main)](https://travis-ci.com/trexima/harvey-client)
 ## Installation
 Installation with Composer:
 ```
