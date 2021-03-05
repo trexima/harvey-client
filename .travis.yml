@@ -1,0 +1,7 @@
+before_script:
+  - cp .env.dist .env
+  - composer install --dev
+language: php
+php:
+  - '7.4'
+  - '8.0'
