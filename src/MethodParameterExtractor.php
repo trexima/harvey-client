@@ -33,7 +33,7 @@ class MethodParameterExtractor
             $reflectionParameters = $reflection->getParameters();
             $parameters = [];
             foreach ($reflectionParameters as $reflectionParameter) {
-                $parameters[$reflectionParameter->getPosition()] = $reflectionParameter->getName();
+                $parameters[$reflectionParameter->getPosition()] = str_replace('_', '.', $reflectionParameter->getName());
             }
             return $parameters;
         });
