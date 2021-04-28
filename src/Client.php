@@ -4,7 +4,15 @@ declare(strict_types=1);
 
 namespace Trexima\HarveyClient;
 
+use GuzzleHttp\BodySummarizer;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\InvalidArgumentException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Utils;
+use Psr\Http\Message\ResponseInterface;
+use ReflectionException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -79,12 +87,21 @@ class Client
      *
      * @param $resurce
      * @param null $query
-     * @return mixed|\Psr\Http\Message\ResponseInterface
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @return mixed|ResponseInterface
+     * @throws GuzzleException
      */
-    public function get($resurce, $query = null)
+    public function get($resurce, $query = null): ResponseInterface
     {
+        /**
+        $stack = new HandlerStack(Utils::chooseHandler());
+        $stack->push(Middleware::httpErrors(new BodySummarizer(2048)), 'http_errors');
+        $stack->push(Middleware::redirect(), 'allow_redirects');
+        $stack->push(Middleware::cookies(), 'cookies');
+        $stack->push(Middleware::prepareBody(), 'prepare_body');
+        */
         return $this->client->request('GET', $resurce, [
+//            'handler' => $stack,
+//            'verify' => false,
             'auth' => [
                 $this->apiUsername,
                 $this->apiPassword
@@ -94,7 +111,7 @@ class Client
                 'Content-type' => 'application/json',
                 'Accept-language' => $this->language
             ],
-            'query' => $query
+            'query' => $query,
         ]);
     }
 
@@ -142,7 +159,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchIsco(?string $title = null, ?int $workArea = null, ?string $alternativeNames_title = null, array $level = [], ?string $code = null, ?int $revisions = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -170,7 +187,7 @@ class Client
      * @param string $order
      * @return array
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function fulltextIsco(?string $title, string $order = 'title'): array
     {
@@ -229,7 +246,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchIscoGroup(?string $title = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -276,7 +293,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchSchool(?string $title = null, ?string $nuts = null, ?string $street = null, ?string $eduid = null, ?string $kodfak = null, array $type = [], array $root = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -321,7 +338,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchSchoolLegacy(?string $title = null, ?string $street = null, array $school = [], array $codeLegacy = [], array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -361,7 +378,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchSchoolType($page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -401,7 +418,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchSchoolKov($page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -444,7 +461,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchSchoolKovYear(?string $school = null, ?string $kov = null, array $year = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -486,7 +503,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchKov(?string $title = null, ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -528,7 +545,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchKovLevel(?string $title = null, ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -569,7 +586,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchKovLevelIsced(array $kovLevel = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -612,7 +629,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchIsced(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -655,7 +672,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchSknace(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -702,7 +719,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchCpa(?string $title = null, array $level = [], ?string $code = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -748,7 +765,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchEsco(?string $title = null, ?string $url = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -794,9 +811,9 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function searchIscoEsco(array $isco = [], array $esco = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIscoEsco(array $isco_code = [], array $esco_id = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
@@ -836,7 +853,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchNuts(?string $title = null, array $level = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -862,7 +879,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchOrganization(?string $title = null, ?string $crn = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
@@ -887,7 +904,7 @@ class Client
      * @param int $perPage
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function searchPosition(?int $idIstp = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
     {
