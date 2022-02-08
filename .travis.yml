@@ -1,6 +1,6 @@
 before_script:
   - cp .env.dist .env
-  - composer install --dev
+  - composer update --dev
 language: php
 php:
   - '7.4'
