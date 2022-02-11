@@ -311,6 +311,32 @@ class Client
     }
 
     /**
+     * @param string|null $query
+     * @param string|null $nuts Begin of NUTS code
+     * @param array $type
+     * @param int $year
+     * @param int $page
+     * @param int $perPage
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function searchSchoolByYear(?string $query, ?string $nuts = null, array $type = [], ?int $year = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'school-by-year-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-by-year', $args);
+
+            return (string)$resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
+
+    /**
      * @param int $id
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
