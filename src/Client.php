@@ -87,10 +87,11 @@ class Client
      *
      * @param $resurce
      * @param null $query
+     * @param null $body
      * @return mixed|ResponseInterface
      * @throws GuzzleException
      */
-    public function get($resurce, $query = null): ResponseInterface
+    public function get($resurce, $query = null, $body = null): ResponseInterface
     {
         /**
         $stack = new HandlerStack(Utils::chooseHandler());
@@ -112,6 +113,7 @@ class Client
                 'Accept-language' => $this->language
             ],
             'query' => $query,
+            'body' => $body,
         ]);
     }
 
@@ -173,10 +175,44 @@ class Client
         if (null === $revisions) {
             $args['revisions'] = $this->getLatestRevision();
         }
+        if ($perPage === 0) {
+            $args['pagination'] = false;
+        }
         $cacheKey = 'search-isco-' . crc32(json_encode($args));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
             $resource = $this->get('api/isco', $args);
+            return (string)$resource->getBody();
+        });
+        return $this->jsonDecode($result);
+    }
+
+    /**
+     * Search ISCOS
+     *
+     * @param array $codes
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function searchIscos(array $codes = [], $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    {
+        $query = [
+            'code_body' => true,
+            'revisions' => $this->getLatestRevision(),
+            'perPage' => $perPage,
+        ];
+
+        if ($perPage === 0) {
+            $query['pagination'] = false;
+        }
+
+        $body['code'] = $codes;
+
+        $cacheKey = 'search-iscos-' . crc32(json_encode($query + $body));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($query, $body) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/isco', $query, json_encode($body));
             return (string)$resource->getBody();
         });
         return $this->jsonDecode($result);
@@ -947,10 +983,14 @@ class Client
         return $this->jsonDecode($result);
     }
 
-    public function getIscoWorkAreas($page = 1, $perPage = self::RESULTS_PER_PAGE, ?string $title = '')
+    public function getIscoWorkAreas($page = 1, $perPage = self::RESULTS_PER_PAGE, ?string $title = '', $order = [])
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
+
+        if ($perPage === 0) {
+            $args['pagination'] = false;
+        }
         $cacheKey = 'isco-work-area-' . crc32(json_encode([$args]));
         $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
             $item->expiresAfter($this->cacheTtl);
