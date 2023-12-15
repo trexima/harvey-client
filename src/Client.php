@@ -163,7 +163,7 @@ class Client
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws ReflectionException
      */
-    public function searchIsco(?string $title = null, ?int $workArea = null, ?string $alternativeNames_title = null, array $level = [], ?string $code = null, ?int $revisions = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchIsco(?string $title = null, ?int $workArea = null, ?string $alternativeNames_title = null, array $level = [], ?string $code = null, ?int $revisions = null, $page = 1, $perPage = self::RESULTS_PER_PAGE, array $properties = [])
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_filter(array_combine($parameterNames, func_get_args()));
