@@ -354,11 +354,12 @@ class Client
      * @param int $year
      * @param int $page
      * @param int $perPage
+     * @param array $root
      * @return mixed
      * @throws \Psr\Cache\InvalidArgumentException
      * @throws ReflectionException
      */
-    public function searchSchoolByYear(?string $query, ?string $nuts = null, array $type = [], ?int $year = null, $page = 1, $perPage = self::RESULTS_PER_PAGE)
+    public function searchSchoolByYear(?string $query, ?string $nuts = null, array $type = [], ?int $year = null, $page = 1, $perPage = self::RESULTS_PER_PAGE, array $root = [])
     {
         $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
         $args = array_combine($parameterNames, func_get_args());
