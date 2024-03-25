@@ -1018,4 +1018,26 @@ class Client
         });
         return $this->jsonDecode($result);
     }
+
+    /**
+     * @param string $school Code of school
+     * @param array $year
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     * @throws ReflectionException
+     */
+    public function getSchoolKovByYear(?string $school = null, ?int $year = null)
+    {
+        $parameterNames = array_slice($this->methodParameterExtractor->extract(__CLASS__, __FUNCTION__), 0, func_num_args());
+        $args = array_combine($parameterNames, func_get_args());
+        $cacheKey = 'search-school-kov-by-year-' . crc32(json_encode([$args]));
+        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
+            $item->expiresAfter($this->cacheTtl);
+            $resource = $this->get('api/school-kov-by-year/' . $args['school'], $args);
+
+            return (string)$resource->getBody();
+        });
+
+        return $this->jsonDecode($result);
+    }
 }
