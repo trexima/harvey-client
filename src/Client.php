@@ -179,12 +179,17 @@ class Client
         if ($perPage === 0) {
             $args['pagination'] = false;
         }
-        $cacheKey = 'search-isco-' . crc32(json_encode($args));
-        $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
-            $item->expiresAfter($this->cacheTtl);
+        if ($json = json_encode($args)) {
+            $cacheKey = 'search-isco-' . crc32($json);
+            $result = $this->cache->get($cacheKey, function (ItemInterface $item) use ($args) {
+                $item->expiresAfter($this->cacheTtl);
+                $resource = $this->get('api/isco', $args);
+                return (string)$resource->getBody();
+            });
+        } else {
             $resource = $this->get('api/isco', $args);
-            return (string)$resource->getBody();
-        });
+            $result = (string)$resource->getBody();
+        }
         return $this->jsonDecode($result);
     }
 
